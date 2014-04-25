@@ -27,6 +27,7 @@ from six import u
 from wtframework.wtf import _wtflog
 from wtframework.wtf.config import WTF_CONFIG_READER, WTF_TIMEOUT_MANAGER
 
+from selenium.webdriver.chrome.options import Options
 
 class WebDriverFactory(object):
 
@@ -173,8 +174,9 @@ class WebDriverFactory(object):
             browser_type = WebDriverFactory.FIREFOX
 
         browser_type_dict = {
-            self.CHROME: lambda: webdriver.Chrome(self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH)),
-            self.FIREFOX: lambda: webdriver.Firefox(),
+            self.CHROME: lambda: webdriver.Chrome(self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH),
+                                                  chrome_options=self.__get_crome_options()),
+            self.FIREFOX: lambda: webdriver.Firefox(firefox_profile=self.__get_firefox_profile()),
             self.INTERNETEXPLORER: lambda: webdriver.Ie(),
             self.OPERA: lambda: webdriver.Opera(),
             self.PHANTOMJS: lambda: self.__create_phantom_js_driver(),
@@ -187,6 +189,27 @@ class WebDriverFactory(object):
             raise TypeError(
                 u("Unsupported Browser Type {0}").format(browser_type))
         # End of method.
+        
+    def __get_crome_options(self):
+        '''
+        Creates chrome_options with extension to be added
+        '''
+        chrome_options = Options()
+        crome_extenison = self._config_reader.get('extensions.crome_extension', None)
+        if chrome_options:
+            chrome_options.add_extension(chrome_extension)
+        return chrome_options
+        
+    def __get_firefox_profile(self):
+        '''
+        Creates Firefox profile with extension added to it
+        '''
+        fp = webdriver.FirefoxProfile()
+        firefox_extension = None
+        firefox_extension = self._config_reader.get('extensions.firefox_extension', None)       
+        if firefox_extension:
+            fp.add_extension(firefox_extension)
+        return fp
 
     def __create_safari_driver(self):
         '''
