@@ -195,8 +195,8 @@ class WebDriverFactory(object):
         Creates chrome_options with extension to be added
         '''
         chrome_options = Options()
-        crome_extenison = self._config_reader.get('extensions.crome_extension', None)
-        if chrome_options:
+        crome_extension = self._config_reader.get('extensions.crome_extension', None)
+        if chrome_extension:
             chrome_options.add_extension(chrome_extension)
         return chrome_options
         
