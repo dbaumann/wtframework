@@ -172,7 +172,8 @@ class WebDriverFactory(object):
             _wtflog("%s missing is missing from config file. Using defaults",
                     WebDriverFactory.BROWSER_TYPE_CONFIG)
             browser_type = WebDriverFactory.FIREFOX
-
+	print "Chrome Driver Path"
+        print self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH)
         browser_type_dict = {
             self.CHROME: lambda: webdriver.Chrome(self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH),
                                                   chrome_options=self.__get_crome_options()),
