@@ -19,8 +19,9 @@ import os
 from threading import current_thread
 import time
 import urllib2
-
+import selenium
 from selenium import webdriver
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from six import u
@@ -172,12 +173,10 @@ class WebDriverFactory(object):
             _wtflog("%s missing is missing from config file. Using defaults",
                     WebDriverFactory.BROWSER_TYPE_CONFIG)
             browser_type = WebDriverFactory.FIREFOX
-	print "Chrome Driver Path"
-        print self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH)
         browser_type_dict = {
             self.CHROME: lambda: webdriver.Chrome(self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH),
                                                   chrome_options=self.__get_crome_options()),
-            self.FIREFOX: lambda: webdriver.Firefox(firefox_profile=self.__get_firefox_profile()),
+            self.FIREFOX: lambda: self.__get_firefox_webdriver(),
             self.INTERNETEXPLORER: lambda: webdriver.Ie(),
             self.OPERA: lambda: webdriver.Opera(),
             self.PHANTOMJS: lambda: self.__create_phantom_js_driver(),
@@ -200,7 +199,23 @@ class WebDriverFactory(object):
         if chrome_extension:
             chrome_options.add_extension(chrome_extension)
         return chrome_options
+       
+
+    def __get_firefox_webdriver(self):
+        '''
+        Returns the firefox webdriver and if firefox binary given then creates 
+        webdriver with specific firefox binary
+        '''
+        ff_binary_path = self._config_reader.get('versions.firefox_version', None)
+        if ff_binary_path:
+            print "Firefox binary path"
+            print ff_binary_path
+            binary = FirefoxBinary(ff_binary_path)
+            return webdriver.Firefox(firefox_binary=binary, firefox_profile=self.__get_firefox_profile())
+
+        return webdriver.Firefox(firefox_profile=self.__get_firefox_profile())
         
+
     def __get_firefox_profile(self):
         '''
         Creates Firefox profile with extension added to it
