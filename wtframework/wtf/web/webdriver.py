@@ -29,6 +29,7 @@ from wtframework.wtf import _wtflog
 from wtframework.wtf.config import WTF_CONFIG_READER, WTF_TIMEOUT_MANAGER
 
 from selenium.webdriver.chrome.options import Options
+from os.path import expanduser
 
 class WebDriverFactory(object):
 
@@ -174,8 +175,7 @@ class WebDriverFactory(object):
                     WebDriverFactory.BROWSER_TYPE_CONFIG)
             browser_type = WebDriverFactory.FIREFOX
         browser_type_dict = {
-            self.CHROME: lambda: webdriver.Chrome(self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH),
-                                                  chrome_options=self.__get_crome_options()),
+            self.CHROME: lambda: self.__get_chrome_webdriver(),
             self.FIREFOX: lambda: self.__get_firefox_webdriver(),
             self.INTERNETEXPLORER: lambda: webdriver.Ie(),
             self.OPERA: lambda: webdriver.Opera(),
@@ -189,15 +189,91 @@ class WebDriverFactory(object):
             raise TypeError(
                 u("Unsupported Browser Type {0}").format(browser_type))
         # End of method.
+
+
+    def __get_chrome_webdriver(self):
+        '''
+        Returns chromedriver with given config
+        '''
+
+        home_dir = expanduser("~")
+        chrome_driver = self._config_reader.get('versions.chrome_driver', None)
+
+        if chrome_driver:
+            chrome_driver_path = os.path.join(home_dir, chrome_driver)
+        else:
+            chrome_driver_path = self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH)
+    
+        #print "Chrome Driver Path"
+        #print chrome_driver_path
+        #print "chrome options"
+        #print self.__get_crome_options()
+                                                                                                
+        return webdriver.Chrome(chrome_driver_path, chrome_options=self.__get_crome_options(), service_args=["--verbose", "--log-path=/tmp/webdriver_log.log"])
+
         
+
     def __get_crome_options(self):
         '''
         Creates chrome_options with extension to be added
         '''
         chrome_options = Options()
+        #print "homme dir"
+        home_dir = expanduser("~")
+        #print home_dir
+
+        chrome_version = self._config_reader.get('versions.chrome_version', None)
+        if chrome_version:
+            binary_path = os.path.join(home_dir, chrome_version)
+            #print "binary path"
+            #print binary_path
+            chrome_options.add_argument("binary=" + binary_path)
+
         chrome_extension = self._config_reader.get('extensions.crome_extension', None)
         if chrome_extension:
-            chrome_options.add_extension(chrome_extension)
+            extension_path = os.path.join(home_dir, chrome_extension)
+            #print "extension path"
+            #print extension_path
+            chrome_options.add_extension(extension_path)
+
+
+        chrome_profile = self._config_reader.get('profiles.chrome_profile', None)
+        if chrome_profile:
+            #print "home profile"
+            #print home_dir
+            chrome_profile_path = os.path.join(home_dir, chrome_profile)
+            #print "user data dir"
+            #print chrome_profile_path
+            chrome_options.add_argument('--user-data-dir=' + chrome_profile_path)
+
+        #chrome_options.add_argument('--trace-startup')
+        #chrome_options.add_argument('--trace-startup-file=/tmp/trace_event.log')
+        #chrome_options.add_argument("--restore-last-session")
+        #chrome_options.add_argument("--set-token")
+        #chrome_options.add_argument("--start-fullscreen")
+        #chrome_options.add_argument("--sync-allow-insecure-xmpp-connection")
+        #chrome_options.add_argument("--sync-try-ssltcp-first-for-xmpp")
+        #chrome_options.add_argument("--test-auto-update-ui")
+        #chrome_options.add_argument("--test-type=ui")
+        #chrome_options.add_argument("--unlimited-storage")
+        #chrome_options.add_argument("--use-gpu-in-tests")
+        #chrome_options.add_argument("--allow-external-pages")
+        #chrome_options.add_argument("--disable-default-apps")
+        #chrome_options.add_argument("--disable-prompt-on-repost")
+        #chrome_options.add_argument("--safebrowsing-disable-auto-update ")
+        #chrome_options.add_argument("--enable-extension-activity-logging")
+        #chrome_options.add_argument("--enable-pixel-output-in-tests")
+        #chrome_options.add_argument("--enable-profile-shortcut-manager")
+        #chrome_options.add_argument("--expose-internals-for-testing")
+        #chrome_options.add_argument("--homepage=www.linkedin.com")
+        #chrome_options.add_argument("--keep-alive-for-test")
+        #chrome_options.add_argument("--keyboard-usability-experiment")
+        #chrome_options.add_argument("--no-default-browser-check")
+        #chrome_options.add_argument("--show-paint-rects")
+        #chrome_options.add_argument("--test-auto-update-ui")
+        #chrome_options.add_argument("--disable-extensions-file-access-check")
+        #chrome_options.add_argument("--disable-translate")
+
         return chrome_options
        
 
