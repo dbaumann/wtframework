@@ -282,25 +282,39 @@ class WebDriverFactory(object):
         Returns the firefox webdriver and if firefox binary given then creates 
         webdriver with specific firefox binary
         '''
-        ff_binary_path = self._config_reader.get('versions.firefox_version', None)
-        if ff_binary_path:
-            #print "Firefox binary path"
-            #print ff_binary_path
+        #print "homme dir"
+        home_dir = expanduser("~")
+        #print home_dir
+        firefox_version = self._config_reader.get('versions.firefox_version', None)
+        if firefox_version:
+            ff_binary_path = os.path.join(home_dir, firefox_version)
+            print "Firefox binary path"
+            print ff_binary_path
             binary = FirefoxBinary(ff_binary_path)
             return webdriver.Firefox(firefox_binary=binary, firefox_profile=self.__get_firefox_profile())
 
         return webdriver.Firefox(firefox_profile=self.__get_firefox_profile())
-        
+
 
     def __get_firefox_profile(self):
         '''
         Creates Firefox profile with extension added to it
         '''
-        fp = webdriver.FirefoxProfile()
+        home_dir = expanduser("~")
+        ff_profile = self._config_reader.get('versions.firefox_profile', None)
+        firefox_profile_path = None
+
+        if ff_profile:
+            firefox_profile_path = os.path.join(home_dir, ff_profile)
+
+        fp = webdriver.FirefoxProfile(profile_directory=firefox_profile_path)
+
         firefox_extension = None
         firefox_extension = self._config_reader.get('extensions.firefox_extension', None)       
         if firefox_extension:
-            fp.add_extension(firefox_extension)
+            ff_ext_path = os.path.join(home_dir, firefox_extension)
+            fp.add_extension(ff_ext_path)
+
         return fp
 
     def __create_safari_driver(self):
