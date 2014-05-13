@@ -288,8 +288,8 @@ class WebDriverFactory(object):
         firefox_version = self._config_reader.get('versions.firefox_version', None)
         if firefox_version:
             ff_binary_path = os.path.join(home_dir, firefox_version)
-            print "Firefox binary path"
-            print ff_binary_path
+            #print "Firefox binary path"
+            #print ff_binary_path
             binary = FirefoxBinary(ff_binary_path)
             return webdriver.Firefox(firefox_binary=binary, firefox_profile=self.__get_firefox_profile())
 
