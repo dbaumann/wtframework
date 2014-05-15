@@ -208,6 +208,8 @@ class WebDriverFactory(object):
         #print chrome_driver_path
         #print "chrome options"
         #print self.__get_crome_options()
+        #print "Chromedriver Path"
+        #print chrome_driver_path
                                                                                                 
         return webdriver.Chrome(chrome_driver_path, chrome_options=self.__get_crome_options(), service_args=["--verbose", "--log-path=/tmp/webdriver_log.log"])
 
@@ -316,6 +318,7 @@ class WebDriverFactory(object):
             fp.add_extension(ff_ext_path)
 
         return fp
+
 
     def __create_safari_driver(self):
         '''
