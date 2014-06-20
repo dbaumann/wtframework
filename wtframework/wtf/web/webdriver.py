@@ -204,13 +204,6 @@ class WebDriverFactory(object):
         else:
             chrome_driver_path = self._config_reader.get(WebDriverFactory.CHROME_DRIVER_PATH)
     
-        #print "Chrome Driver Path"
-        #print chrome_driver_path
-        #print "chrome options"
-        #print self.__get_crome_options()
-        #print "Chromedriver Path"
-        #print chrome_driver_path
-                                                                                                
         return webdriver.Chrome(chrome_driver_path, chrome_options=self.__get_crome_options(), service_args=["--verbose", "--log-path=/tmp/webdriver_log.log"])
 
         
@@ -220,61 +213,26 @@ class WebDriverFactory(object):
         Creates chrome_options with extension to be added
         '''
         chrome_options = Options()
-        #print "homme dir"
         home_dir = expanduser("~")
-        #print home_dir
 
         chrome_version = self._config_reader.get('versions.chrome_version', None)
         if chrome_version:
             binary_path = os.path.join(home_dir, chrome_version)
-            #print "binary path"
-            #print binary_path
             chrome_options.add_argument("binary=" + binary_path)
 
-        chrome_extension = self._config_reader.get('extensions.crome_extension', None)
+        chrome_extension = self._config_reader.get('extensions.chrome_extension', None)
         if chrome_extension:
             extension_path = os.path.join(home_dir, chrome_extension)
-            #print "extension path"
-            #print extension_path
             chrome_options.add_extension(extension_path)
 
 
-        chrome_profile = self._config_reader.get('profiles.chrome_profile', None)
-        if chrome_profile:
-            #print "home profile"
-            #print home_dir
-            chrome_profile_path = os.path.join(home_dir, chrome_profile)
-            #print "user data dir"
-            #print chrome_profile_path
-            chrome_options.add_argument('--user-data-dir=' + chrome_profile_path)
-
-        #chrome_options.add_argument('--trace-startup')
-        #chrome_options.add_argument('--trace-startup-file=/tmp/trace_event.log')
-        #chrome_options.add_argument("--restore-last-session")
-        #chrome_options.add_argument("--set-token")
-        #chrome_options.add_argument("--start-fullscreen")
-        #chrome_options.add_argument("--sync-allow-insecure-xmpp-connection")
-        #chrome_options.add_argument("--sync-try-ssltcp-first-for-xmpp")
-        #chrome_options.add_argument("--test-auto-update-ui")
-        #chrome_options.add_argument("--test-type=ui")
-        #chrome_options.add_argument("--unlimited-storage")
-        #chrome_options.add_argument("--use-gpu-in-tests")
-        #chrome_options.add_argument("--allow-external-pages")
-        #chrome_options.add_argument("--disable-default-apps")
-        #chrome_options.add_argument("--disable-prompt-on-repost")
-        #chrome_options.add_argument("--safebrowsing-disable-auto-update ")
-        #chrome_options.add_argument("--enable-extension-activity-logging")
-        #chrome_options.add_argument("--enable-pixel-output-in-tests")
-        #chrome_options.add_argument("--enable-profile-shortcut-manager")
-        #chrome_options.add_argument("--expose-internals-for-testing")
-        #chrome_options.add_argument("--homepage=www.linkedin.com")
-        #chrome_options.add_argument("--keep-alive-for-test")
-        #chrome_options.add_argument("--keyboard-usability-experiment")
-        #chrome_options.add_argument("--no-default-browser-check")
-        #chrome_options.add_argument("--show-paint-rects")
-        #chrome_options.add_argument("--test-auto-update-ui")
-        #chrome_options.add_argument("--disable-extensions-file-access-check")
-        #chrome_options.add_argument("--disable-translate")
+        profile_prefs = self._config_reader.get('profile_prefs.chrome', None)
+        for pref in profile_prefs:
+            pref_val = profile_prefs[pref]
+            if pref_val:
+                chrome_options.add_argument(pref + "=" + pref_val)
+            else:
+                chrome_options.add_argument(pref)
 
         return chrome_options
        
@@ -284,14 +242,10 @@ class WebDriverFactory(object):
         Returns the firefox webdriver and if firefox binary given then creates 
         webdriver with specific firefox binary
         '''
-        #print "homme dir"
         home_dir = expanduser("~")
-        #print home_dir
         firefox_version = self._config_reader.get('versions.firefox_version', None)
         if firefox_version:
             ff_binary_path = os.path.join(home_dir, firefox_version)
-            #print "Firefox binary path"
-            #print ff_binary_path
             binary = FirefoxBinary(ff_binary_path)
             return webdriver.Firefox(firefox_binary=binary, firefox_profile=self.__get_firefox_profile())
 
@@ -305,11 +259,8 @@ class WebDriverFactory(object):
         home_dir = expanduser("~")
         ff_profile = self._config_reader.get('versions.firefox_profile', None)
         firefox_profile_path = None
-
-        if ff_profile:
-            firefox_profile_path = os.path.join(home_dir, ff_profile)
-
-        fp = webdriver.FirefoxProfile(profile_directory=firefox_profile_path)
+        
+        fp = webdriver.FirefoxProfile()
 
         firefox_extension = None
         firefox_extension = self._config_reader.get('extensions.firefox_extension', None)       
@@ -317,6 +268,13 @@ class WebDriverFactory(object):
             ff_ext_path = os.path.join(home_dir, firefox_extension)
             fp.add_extension(ff_ext_path)
 
+        profile_prefs = self._config_reader.get('profile_prefs.firefox', None)
+        for pref in profile_prefs:
+            pref_val = profile_prefs[pref]
+            if pref_val:
+                fp.set_preference(pref, pref_val)
+            else:
+                fp.set_preference(pref)
         return fp
 
 
