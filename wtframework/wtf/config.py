@@ -15,7 +15,6 @@
 #    along with WTFramework.  If not, see <http://www.gnu.org/licenses/>.
 ##########################################################################
 
-from types import NoneType
 from wtframework.wtf.utils.project_utils import ProjectUtils
 import os
 import re
@@ -99,7 +98,7 @@ class ConfigReader:
         # First attempt to get the var from OS enviornment.
         os_env_string = ConfigReader.ENV_PREFIX + key
         os_env_string = os_env_string.replace(".", "_")
-        if type(os.getenv(os_env_string)) != NoneType:
+        if os.getenv(os_env_string):
             return os.getenv(os_env_string)
 
         # Otherwise search through config files.
